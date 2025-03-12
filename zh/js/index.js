@@ -26,7 +26,24 @@
  */
 module.exports.createHttpHeaders = (input) => {
     // TODO: your code here
-    return {};
+     if (!Array.isArray(input) || input.length === 0) {
+        return {};
+    }
+
+    const headers = {};
+
+    input.forEach(header => {
+        const headerName = header[0].toLowerCase();
+        const headerValues = header.slice(1).join(', ');
+
+        if (headers[headerName]) {
+            headers[headerName] += `, ${headerValues}`;
+        } else {
+            headers[headerName] = headerValues;
+        }
+    });
+
+    return headers;
 };
 
 /**
@@ -50,5 +67,27 @@ module.exports.createHttpHeaders = (input) => {
  */
 module.exports.getItems = (items, params) => {
     // TODO: your code here
-    return [];
-}
+    if (!Array.isArray(items) || items.length === 0) {
+        return [];
+    }
+
+    const { page = 1, pageSize = 4, sort = 'asc' } = params;
+    const sortedItems = items.sort((a, b) => {
+        const titleA = a.title.toLowerCase();
+        const titleB = b.title.toLowerCase();
+
+        if (sort === 'asc') {
+            return titleA.localeCompare(titleB);
+        } else {
+            return titleB.localeCompare(titleA);
+        }
+    });
+
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+
+    return sortedItems.slice(startIndex, endIndex).map(item => ({
+        id: item.id,
+        title: { main: item.displayTitle.replace(/<[^>]+>/g, '') },
+    }));
+};
